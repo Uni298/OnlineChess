@@ -1,34 +1,52 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>チェス: ランダムマッチ（GASシグナリング）</title>
-<link rel="stylesheet" href="styles.css" />
-<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>P2P Chess</title>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <div id="app">
-    <div id="board"></div>
-    <div id="side">
-      <h2>ランダムマッチ</h2>
-      <div class="row">
-        <input id="gasUrl" placeholder="GAS WebアプリURL" />
-        <button id="btnMatch">ランダムマッチ開始</button>
-      </div>
-      <div id="status">未接続</div>
-      <div id="youWrap">あなたの陣営: <span id="you">未設定</span></div>
-
-      <h3>手番ログ</h3>
-      <div id="log"></div>
-
-      <h3>操作</h3>
-      <p class="small">
-        マスをクリック→ハイライトされた候補へ移動。相手の手は移動元・先が強調表示されます。
-      </p>
+  <header class="app-header">
+    <div class="brand">P2P Chess</div>
+    <div class="controls">
+      <button id="matchBtn" class="btn primary">ランダムマッチ開始</button>
+      <button id="leaveBtn" class="btn ghost">待機から離脱</button>
     </div>
-  </div>
+  </header>
 
-<script src="app.js"></script>
+  <main class="layout">
+    <section class="side-panel">
+      <div class="status-card">
+        <div class="row"><span class="label">接続状態:</span> <span id="connState">未接続</span></div>
+        <div class="row"><span class="label">あなた:</span> <span id="mySide">-</span></div>
+        <div class="row"><span class="label">相手:</span> <span id="opponentSide">-</span></div>
+        <div class="row"><span class="label">手番:</span> <span id="turnDisplay">-</span></div>
+      </div>
+
+      <div class="log-card">
+        <div class="log-header">履歴</div>
+        <ul id="moveLog" class="log"></ul>
+      </div>
+    </section>
+
+    <section class="board-panel">
+      <div id="board" class="board"></div>
+      <div class="legend">
+        <span class="dot can-move"></span> 合法手
+        <span class="dot last-move"></span> 直近の移動
+        <span class="dot capture"></span> 取り
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div>相手の移動: <span id="lastOpponentMove">-</span></div>
+  </footer>
+
+  <script>
+    const GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbzt6P2TBcsswLlQ2NcHej17sWuhQSabh-aLw2ju5MBxbqHZPGc6tZ-gychZY8JfcC_miA/exec"; // 例: https://script.google.com/macros/s/XXXXX/exec
+  </script>
+  <script src="./app.js"></script>
 </body>
 </html>
