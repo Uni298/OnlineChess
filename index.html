@@ -1,52 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>P2P Chess</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>P2P Light Chess — Random Match</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="app-header">
-    <div class="brand">P2P Chess</div>
-    <div class="controls">
-      <button id="matchBtn" class="btn primary">ランダムマッチ開始</button>
-      <button id="leaveBtn" class="btn ghost">待機から離脱</button>
-    </div>
-  </header>
+  <div id="app">
+    <header>
+      <h1>P2P Chess &mdash; ランダムマッチ</h1>
+      <div class="meta">
+        <div id="status">Status: <span id="statusText">待機中</span></div>
+        <div id="turn">手番: <span id="turnText">—</span></div>
+      </div>
+    </header>
 
-  <main class="layout">
-    <section class="side-panel">
-      <div class="status-card">
-        <div class="row"><span class="label">接続状態:</span> <span id="connState">未接続</span></div>
-        <div class="row"><span class="label">あなた:</span> <span id="mySide">-</span></div>
-        <div class="row"><span class="label">相手:</span> <span id="opponentSide">-</span></div>
-        <div class="row"><span class="label">手番:</span> <span id="turnDisplay">-</span></div>
+    <main>
+      <div id="boardWrap">
+        <div id="board"></div>
       </div>
 
-      <div class="log-card">
-        <div class="log-header">履歴</div>
-        <ul id="moveLog" class="log"></ul>
-      </div>
-    </section>
+      <aside id="rightPanel">
+        <button id="btnFind">ランダムマッチを探す / 開始</button>
+        <div class="log">
+          <h3>ログ</h3>
+          <div id="log"></div>
+        </div>
+        <div class="info">
+          <h3>対戦情報</h3>
+          <div id="peerInfo">未接続</div>
+        </div>
+      </aside>
+    </main>
 
-    <section class="board-panel">
-      <div id="board" class="board"></div>
-      <div class="legend">
-        <span class="dot can-move"></span> 合法手
-        <span class="dot last-move"></span> 直近の移動
-        <span class="dot capture"></span> 取り
-      </div>
-    </section>
-  </main>
+    <footer>
+      <small>ルール: クイーンが取られたら負け（チェックメイトは判定しません）。</small>
+    </footer>
+  </div>
 
-  <footer class="app-footer">
-    <div>相手の移動: <span id="lastOpponentMove">-</span></div>
-  </footer>
-
-  <script>
-    const GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbzt6P2TBcsswLlQ2NcHej17sWuhQSabh-aLw2ju5MBxbqHZPGc6tZ-gychZY8JfcC_miA/exec"; // 例: https://script.google.com/macros/s/XXXXX/exec
-  </script>
-  <script src="./app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
