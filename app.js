@@ -283,7 +283,7 @@ function decompressText(b64) {
 let pollTimer = null;
 
 btnMatch.onclick = async () => {
-  const gasUrl = gasUrlEl.value.trim();
+  const gasUrl = "https://script.google.com/macros/s/AKfycbzHqBTdx79qzGCgjUgyPx0FIFGTPgzq-x_PTjg1_xpue7gQ6B6tFGlD7rQJVrGvto_p2A/exec";
   if (!gasUrl) { alert('GAS WebアプリURLを入力してください'); return; }
 
   // 自分が白側（待機者）の可能性があるので、まずオファー生成
