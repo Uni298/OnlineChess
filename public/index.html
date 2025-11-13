@@ -1,53 +1,42 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Online Chess - Random Match</title>
-  <link rel="stylesheet" href="styles.css" />
-  <!-- Socket.IO -->
-  <script src="/socket.io/socket.io.js"></script>
-  <!-- chess.js (client) -->
-  <script src="https://cdn.jsdelivr.net/npm/chess.js@1.0.0/dist/chess.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Chess</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">Bright Chess</div>
-      <button id="findBtn" class="primary">ランダムマッチ開始</button>
-    </header>
+    <div class="container">
+        <header>
+            <h1>Online Chess</h1>
+            <div id="status" class="status">接続中...</div>
+        </header>
 
-    <main class="layout">
-      <section class="board-section">
-        <div id="statusBar" class="status">
-          <span id="roleLabel">未参加</span>
-          <span id="turnLabel">手番: -</span>
-          <span id="lastMoveLabel">前手: -</span>
+        <div class="game-info">
+            <div id="playerInfo" class="player-info">
+                <div class="color-indicator">
+                    <span>あなた: </span>
+                    <span id="playerColor" class="color"></span>
+                </div>
+                <div class="turn-indicator">
+                    <span>現在の手番: </span>
+                    <span id="currentTurn" class="turn"></span>
+                </div>
+            </div>
         </div>
-        <div id="board" class="board"></div>
-      </section>
 
-      <aside class="side">
-        <div class="card">
-          <h2>試合情報</h2>
-          <div class="info-row">
-            <span class="label">ゲームID:</span><span id="gameId">-</span>
-          </div>
-          <div class="info-row">
-            <span class="label">あなたの色:</span><span id="myColor">-</span>
-          </div>
-          <div class="info-row">
-            <span class="label">状態:</span><span id="gameStatus">待機中</span>
-          </div>
-          <div class="divider"></div>
-          <div class="tip">
-            クイーンが取られた瞬間に負け（サドンデス）。合法手のみ、移動アニメーションあり。
-          </div>
+        <div class="chess-container">
+            <div id="chessboard" class="chessboard"></div>
         </div>
-      </aside>
-    </main>
-  </div>
 
-  <script src="client.js"></script>
+        <div class="moves-history">
+            <h3>移動履歴</h3>
+            <div id="movesList" class="moves-list"></div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
