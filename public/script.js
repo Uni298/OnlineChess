@@ -197,20 +197,28 @@ class ChessGame {
         // 簡易的な移動ルール（実際のチェスルールとは異なります）
         switch (pieceType) {
             case 'p': // ポーン
-                const direction = this.playerColor === 'white' ? -1 : 1;
-                // 前方1マス
-                if (this.isValidPosition(row + direction, col) && !this.board[row + direction][col]) {
-                    this.validMoves.push({ row: row + direction, col });
+            const direction = this.playerColor === 'white' ? -1 : 1;
+            const startRow = this.playerColor === 'white' ? 6 : 1;
+            
+            // 前方1マス
+            if (this.isValidPosition(row + direction, col) && !this.board[row + direction][col]) {
+                this.validMoves.push({ row: row + direction, col });
+                
+                // 初期位置からは2マス進める
+                if (row === startRow && !this.board[row + 2 * direction][col]) {
+                    this.validMoves.push({ row: row + 2 * direction, col });
                 }
-                // 斜めの取り
-                [-1, 1].forEach(offset => {
-                    if (this.isValidPosition(row + direction, col + offset) && 
-                        this.board[row + direction][col + offset] && 
-                        !this.isOwnPiece(this.board[row + direction][col + offset])) {
-                        this.validMoves.push({ row: row + direction, col: col + offset });
-                    }
-                });
-                break;
+            }
+            
+            // 斜めの取り
+            [-1, 1].forEach(offset => {
+                if (this.isValidPosition(row + direction, col + offset) && 
+                    this.board[row + direction][col + offset] && 
+                    !this.isOwnPiece(this.board[row + direction][col + offset])) {
+                    this.validMoves.push({ row: row + direction, col: col + offset });
+                }
+            });
+            break;
                 
             case 'r': // ルーク
                 this.addLinearMoves(row, col, [[-1,0],[1,0],[0,-1],[0,1]]);
@@ -275,12 +283,24 @@ class ChessGame {
     }
 
     makeMove(fromRow, fromCol, toRow, toCol) {
-        this.socket.emit('move', {
-            gameId: this.gameId,
-            from: { row: fromRow, col: fromCol },
-            to: { row: toRow, col: toCol }
-        });
+    const piece = this.board[fromRow][fromCol];
+    const pieceType = piece.toLowerCase();
+    
+    // ポーンのプロモーションをチェック
+    if (pieceType === 'p') {
+        const promotionRow = this.playerColor === 'white' ? 0 : 7;
+        if (toRow === promotionRow) {
+            // クイーンに自動で昇格（実際のチェスでは選択可能ですが、簡略化のため自動でクイーンに）
+            this.board[fromRow][fromCol] = this.playerColor === 'white' ? 'Q' : 'q';
+        }
     }
+    
+    this.socket.emit('move', {
+        gameId: this.gameId,
+        from: { row: fromRow, col: fromCol },
+        to: { row: toRow, col: toCol }
+    });
+}
 
     updateStatus(message) {
         document.getElementById('status').textContent = message;
