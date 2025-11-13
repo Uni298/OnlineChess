@@ -1,0 +1,257 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+header {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    font-weight: 300;
+}
+
+.status {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+.game-info {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.player-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.color-indicator, .turn-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.color, .turn {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.color.white, .turn.white {
+    background: #ecf0f1;
+    color: #2c3e50;
+    border: 2px solid #bdc3c7;
+}
+
+.color.black, .turn.black {
+    background: #2c3e50;
+    color: white;
+    border: 2px solid #34495e;
+}
+
+.chess-container {
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    background: white;
+}
+
+.chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 70px);
+    grid-template-rows: repeat(8, 70px);
+    border: 3px solid #2c3e50;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.square.white {
+    background: #f0d9b5;
+}
+
+.square.black {
+    background: #b58863;
+}
+
+.square.selected {
+    background: #aec6cf !important;
+}
+
+.square.valid-move::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: rgba(46, 204, 113, 0.6);
+    border-radius: 50%;
+}
+
+.square.valid-capture::before {
+    content: '';
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    border: 4px solid rgba(231, 76, 60, 0.6);
+    border-radius: 50%;
+}
+
+.piece {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.piece.moving {
+    z-index: 10;
+    transform: scale(1.1);
+}
+
+.coordinates {
+    position: absolute;
+    font-size: 12px;
+    color: rgba(0,0,0,0.6);
+}
+
+.coordinates.file {
+    bottom: 2px;
+    right: 4px;
+}
+
+.coordinates.rank {
+    top: 2px;
+    left: 4px;
+}
+
+.moves-history {
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+.moves-history h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.moves-list {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.move-item {
+    padding: 10px 15px;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.move-item.white {
+    border-left-color: #3498db;
+}
+
+.move-item.black {
+    border-left-color: #e74c3c;
+}
+
+.game-over {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.game-over-content {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.game-over-content h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.restart-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.restart-btn:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .chessboard {
+        grid-template-columns: repeat(8, 45px);
+        grid-template-rows: repeat(8, 45px);
+    }
+    
+    .piece {
+        font-size: 30px;
+    }
+    
+    .player-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
