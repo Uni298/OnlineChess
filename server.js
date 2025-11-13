@@ -1,68 +1,142 @@
 // server.js
-// Node.js server for Render: Express + PeerJS signaling + simple random matchmaking
-
 const express = require('express');
-const { ExpressPeerServer } = require('peer');
-const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
+const { Chess } = require('chess.js');
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const server = http.createServer(app);
+const io = new Server(server);
 
-const server = require('http').createServer(app);
+app.use(express.static('public')); // serve index.html, client.js, styles.css from /public
 
-// PeerJS signaling server
-const peerServer = ExpressPeerServer(server, {
-  path: '/peer',
-  proxied: true,
+// Simple queue-based random matchmaking
+let waitingPlayer = null;
+const games = new Map(); // gameId -> { chess, players: {white, black}, lastMove, status }
+
+function createGame(playerA, playerB) {
+  const gameId = `g_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  // random colors
+  const white = Math.random() < 0.5 ? playerA : playerB;
+  const black = white === playerA ? playerB : playerA;
+
+  const chess = new Chess();
+  games.set(gameId, {
+    chess,
+    players: { white, black },
+    lastMove: null,
+    status: 'playing'
+  });
+
+  white.join(gameId);
+  black.join(gameId);
+
+  io.to(gameId).emit('game:start', {
+    gameId,
+    fen: chess.fen(),
+    turn: chess.turn(), // 'w' or 'b'
+    colors: {
+      [white.id]: 'w',
+      [black.id]: 'b'
+    }
+  });
+}
+
+io.on('connection', (socket) => {
+  socket.emit('lobby:connected', { id: socket.id });
+
+  // Enter matchmaking
+  socket.on('lobby:findMatch', () => {
+    if (waitingPlayer && waitingPlayer.id !== socket.id) {
+      createGame(waitingPlayer, socket);
+      waitingPlayer = null;
+    } else {
+      waitingPlayer = socket;
+      socket.emit('lobby:waiting');
+    }
+  });
+
+  // Handle moves
+  socket.on('game:move', ({ gameId, from, to, promotion }) => {
+    const game = games.get(gameId);
+    if (!game || game.status !== 'playing') return;
+
+    const { chess, players } = game;
+    const myColor = players.white.id === socket.id ? 'w' :
+                    players.black.id === socket.id ? 'b' : null;
+    if (!myColor) return;
+
+    if (chess.turn() !== myColor) {
+      socket.emit('game:error', { message: 'Not your turn.' });
+      return;
+    }
+
+    const move = chess.move({ from, to, promotion: promotion || 'q' });
+    if (!move) {
+      socket.emit('game:error', { message: 'Illegal move.' });
+      return;
+    }
+
+    game.lastMove = { from, to, san: move.san };
+
+    // Queen capture sudden death rule
+    const captured = move.captured;
+    const capturedPieceIsQueen = captured === 'q';
+    let winner = null;
+    if (capturedPieceIsQueen) {
+      // If black queen captured, black loses; if white queen captured, white loses
+      winner = (move.color === 'w') ? 'w' : 'b'; // mover captured opponent's queen
+      game.status = 'ended';
+    }
+
+    // Regular checkmate/stalemate also ends the game (for integrity)
+    if (chess.isGameOver() && game.status !== 'ended') {
+      game.status = 'ended';
+      if (chess.isCheckmate()) {
+        winner = chess.turn() === 'w' ? 'b' : 'w'; // side who just moved delivered mate
+      } else {
+        winner = 'draw';
+      }
+    }
+
+    io.to(gameId).emit('game:update', {
+      fen: chess.fen(),
+      turn: chess.turn(),
+      lastMove: game.lastMove,
+      status: game.status,
+      winner,
+      suddenDeath: capturedPieceIsQueen
+    });
+  });
+
+  socket.on('disconnect', () => {
+    // Handle disconnection
+    if (waitingPlayer && waitingPlayer.id === socket.id) {
+      waitingPlayer = null;
+    }
+    // End games where a player disconnects
+    for (const [gameId, game] of games.entries()) {
+      if (game.status === 'playing' &&
+          (game.players.white.id === socket.id || game.players.black.id === socket.id)) {
+        game.status = 'ended';
+        const winner = (game.players.white.id === socket.id) ? 'b' : 'w'; // the remaining player wins
+        io.to(gameId).emit('game:update', {
+          fen: game.chess.fen(),
+          turn: game.chess.turn(),
+          lastMove: game.lastMove,
+          status: game.status,
+          winner,
+          suddenDeath: false,
+          reason: 'opponent_disconnected'
+        });
+        io.socketsLeave(gameId); // clear room
+        games.delete(gameId);
+      }
+    }
+  });
 });
-app.use('/peerjs', peerServer);
 
-// In-memory matchmaking queue
-let waitingPeerId = null;
-
-// Register yourself in the matchmaking queue
-app.post('/match/register', (req, res) => {
-  const { peerId } = req.body;
-  if (!peerId) return res.status(400).json({ error: 'peerId required' });
-
-  if (!waitingPeerId) {
-    waitingPeerId = peerId;
-    return res.json({ status: 'waiting' });
-  }
-
-  if (waitingPeerId === peerId) {
-    return res.json({ status: 'waiting' });
-  }
-
-  // Pair found
-  const opponentId = waitingPeerId;
-  waitingPeerId = null;
-  return res.json({ status: 'paired', opponentId });
-});
-
-// Poll to see if someone paired with you
-app.post('/match/check', (req, res) => {
-  const { peerId } = req.body;
-  if (!peerId) return res.status(400).json({ error: 'peerId required' });
-
-  // If there is someone waiting (not you), pair you now
-  if (waitingPeerId && waitingPeerId !== peerId) {
-    const opponentId = waitingPeerId;
-    waitingPeerId = null;
-    return res.json({ status: 'paired', opponentId });
-  }
-
-  return res.json({ status: 'waiting' });
-});
-
-// Health check
-app.get('/', (_req, res) => {
-  res.send('P2P Chess server is running.');
-});
-
-// Render uses PORT env
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`Server listening on http://localhost:${PORT}`);
 });
