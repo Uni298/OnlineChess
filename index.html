@@ -1,54 +1,7 @@
-<!-- index.html -->
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>P2P Chess — Random Match</title>
-  <link rel="stylesheet" href="./style.css" />
-  <!-- PeerJS CDN -->
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <!-- chess.js CDN (ES module friendly via window.CHESS) -->
-  <script src="https://cdn.jsdelivr.net/npm/chess.js@1.0.0/chess.min.js"></script>
-</head>
-<body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">P2P Chess</div>
-      <div class="status">
-        <span id="connStatus" class="badge">接続準備中...</span>
-        <span id="roleBadge" class="badge">—</span>
-        <span id="turnBadge" class="badge">—</span>
-      </div>
-    </header>
+<html>
+  <body>
+    <b>Online Chess</b>
 
-    <main class="main">
-      <section class="left">
-        <div id="board" class="board"></div>
-        <div class="controls">
-          <button id="findMatchBtn" class="btn">ランダムマッチ開始</button>
-          <button id="resetBtn" class="btn btn-secondary">リセット</button>
-        </div>
-      </section>
-
-      <section class="right">
-        <div class="panel">
-          <h3>対戦情報</h3>
-          <div class="info-grid">
-            <div><strong>あなたのID:</strong> <span id="myId">—</span></div>
-            <div><strong>相手のID:</strong> <span id="opponentId">—</span></div>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>ログ</h3>
-          <div id="log" class="log"></div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">Queen capture = lose. Legal moves only. P2P via PeerJS.</footer>
-  </div>
-
-  <script src="./app.js" type="module"></script>
-</body>
+    https://onlinechese.onrender.com
+  </body>
 </html>
